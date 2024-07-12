@@ -54,11 +54,13 @@ Here's a possible implementation in C++:
 
 ```cpp
 
+
 #include <iostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
 #include <utility>
+#include <list>
 
 using namespace std;
 
@@ -68,6 +70,7 @@ private:
 	int capacity;
 	int readTime;
 	int writeTime;
+	list<string> order;
 	unordered_map<string, string> storage;
 
 public:
@@ -80,9 +83,13 @@ public:
 	void write(const string&  key, const string& value)
 	{
 		if(storage.size() >= capacity){
-			storage.erase(storage.begin());
+			string olderKey = order.front();
+			order.pop_front();
+            storage.erase(olderKey);
 		}
-
+		if (storage.find(key) == storage.end()) {
+            order.push_back(key);
+        }
 		storage[key] = value;
 	}
 
@@ -105,9 +112,8 @@ public:
 	}
 	
 	void printCache(){
-	    cout<<"storage size="<<storage.size()<<" capacity="<<capacity<<endl;
-	    for(auto itr = storage.begin(); itr!=storage.end(); itr++)
-	        cout<<"{"<<itr->first<<itr->second<<"}, ";
+	    for(auto itr = order.begin(); itr!=order.end(); itr++)
+	        cout<<"{"<<*itr<<"}, ";
 	    cout<<endl;
 	}
 };
@@ -189,7 +195,10 @@ public:
 	{
 	    cout<<"------------------------"<<endl;
 	    for(int i=0; i<levels.size(); i++)
+	    {
+	        cout<<"level:"<<i<<" => ";
 	        levels[i]->printCache();
+	    }
 	    cout<<"------------------------\n"<<endl;
 	}
 
@@ -213,9 +222,10 @@ int main()
     cacheSystem.writeKey("C", "3");
 
     cacheSystem.printCache();
+    
     cacheSystem.readKey("A");
-    cacheSystem.readKey("B");
     cacheSystem.readKey("C");
+    cacheSystem.readKey("B");
     cacheSystem.readKey("D");
     
     cacheSystem.printCache();
@@ -225,6 +235,7 @@ int main()
 
     return 0;
 }
+
 
 
 ```
